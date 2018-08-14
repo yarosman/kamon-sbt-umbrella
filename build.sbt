@@ -1,6 +1,7 @@
 scalaVersion := "2.12.6"
 
 sbtPlugin := true
+version := (version in ThisBuild).value
 
 organization := "com.impactua"
 name := "kamon-sbt-umbrella"
