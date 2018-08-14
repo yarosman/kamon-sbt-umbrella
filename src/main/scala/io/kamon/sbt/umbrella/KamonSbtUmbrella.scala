@@ -1,15 +1,14 @@
 package io.kamon.sbt.umbrella
 
-import sbt._
-import Keys._
-import bintray.{Bintray, BintrayPlugin}
-import bintray.BintrayKeys.{bintrayOrganization, bintrayRepository}
+import bintray.BintrayPlugin
 import com.lightbend.sbt.SbtAspectj._
-import com.lightbend.sbt.SbtAspectj.autoImport
 import com.lightbend.sbt.SbtAspectj.autoImport._
+import sbt.Keys._
+import sbt._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.ReleaseStateTransformations._
-import sys.process.Process
+
+import scala.sys.process.Process
 
 object KamonSbtUmbrella extends AutoPlugin {
 
@@ -42,15 +41,12 @@ object KamonSbtUmbrella extends AutoPlugin {
     javacOptions := Seq(
       "-Xlint:-options"
     ),
-    bintrayOrganization := Some("kamon-io"),
-    bintrayRepository := bintrayRepositorySetting.value,
     crossPaths := true,
     pomIncludeRepository := { x =>
       false
     },
     publishArtifact in Test := false,
     publishMavenStyle := publishMavenStyleSetting.value,
-    pomExtra := defaultPomExtra(name.value),
     resolvers += Resolver.bintrayRepo("kamon-io", "releases")
   )
 
@@ -94,7 +90,7 @@ object KamonSbtUmbrella extends AutoPlugin {
   private def versionSetting = Def.setting {
     val originalVersion = (version in ThisBuild).value
     if (isSnapshotVersion(originalVersion)) {
-      val gitRevision = Process("git rev-parse HEAD").lines.head
+      val gitRevision = Process("git rev-parse HEAD").lineStream.head
       originalVersion.replace("SNAPSHOT", gitRevision)
     } else {
       originalVersion
@@ -121,24 +117,6 @@ object KamonSbtUmbrella extends AutoPlugin {
 
   private def isSnapshotVersion(version: String): Boolean = {
     (version matches """(?:\d+\.)?(?:\d+\.)?(?:\d+)(?:-[A-Z0-9]*)?-[0-9a-f]{5,40}""") || (version endsWith "-SNAPSHOT")
-  }
-
-  private def bintrayRepositorySetting = Def.setting {
-    if (isSnapshot.value) "snapshots"
-    else if (sbtPlugin.value) Bintray.defaultSbtPluginRepository
-    else "releases"
-  }
-
-  def defaultPomExtra(projectName: String) = {
-    <url>http://kamon.io</url>
-    <scm>
-      <url>git://github.com/kamon-io/{projectName}.git</url>
-      <connection>scm:git:git@github.com:kamon-io/{projectName}.git</connection>
-    </scm>
-    <developers>
-      <developer><id>ivantopo</id><name>Ivan Topolnjak</name><url>https://twitter.com/ivantopo</url></developer>
-      <developer><id>dpsoft</id><name>Diego Parra</name><url>https://twitter.com/diegolparra</url></developer>
-    </developers>
   }
 
   private def aspectjDependencySettings = Seq(

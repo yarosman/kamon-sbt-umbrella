@@ -1,6 +1,3 @@
-import sbt.{Credentials, Path}
-import sbtrelease.ReleaseStateTransformations._
-
 scalaVersion := "2.12.6"
 
 sbtPlugin := true
@@ -15,9 +12,10 @@ publishArtifact := true
 publishArtifact in Test := false
 
 bintrayReleaseOnPublish := true
-bintrayPackage := name.value
+bintrayPackage := "kamon-sbt-umbrella"
 bintrayRepository := "sbt-plugins"
-bintrayOrganization in bintray := Some("yarosman")
+
+updateOptions := updateOptions.value.withGigahorse(false)
 
 addSbtPlugin("com.lightbend.sbt" % "sbt-aspectj" % "0.11.0")
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.9")
